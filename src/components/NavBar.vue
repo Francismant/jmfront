@@ -24,7 +24,7 @@ export default defineComponent({
 </script>
 <script setup>
 </script>
-<style>
+<style scoped>
 .container {
     height: 70px;
     width: 100%;

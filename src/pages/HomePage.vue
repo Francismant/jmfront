@@ -3,9 +3,15 @@
     <ParallaxComponent />
   </div>
   <div class="intro-container">
-    <q-img :src="urlImg" alt="Description de l'image" class="image-container"/>
-    <p class="text-container" v-if="introsData.length > 0">{{ introsData[0].text }}</p>
-    <!-- <p>{{ introsData.text }}</p> -->
+    <q-img :src="'http://localhost:1337' + introsData[0].image" alt="Description de l'image" class="image-container"/>
+    <p class="text-container">{{ introsData[0].text }}</p>
+  </div>
+  <div class="caroussel-container">
+    <carousselHome
+      v-for="carousselData in carousselsData"
+      :key="carousselData.id"
+      :datasImg="carousselData"
+    />
   </div>
 </template>
 
@@ -13,51 +19,61 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import ParallaxComponent from '../components/ParallaxComponent.vue';
+import carousselHome from '../components/CarousselHome.vue';
 
-const introsData = ref([]);
-
-// async function getIntroData() {
-//   const data = await axios.get('http://localhost:1337/api/intros?populate=*');
-//   introsData.value = data.data.map((introData) => ({
-//     ...introData,
-//     text: introData.attributes.text,
-//   }));
-//   // introsData.value = data.data;
-//   // console.log(introsData.value.data);
-// }
+const introsData = ref([{}]);
+const carousselsData = ref([{}]);
 
 async function getIntroData() {
   const response = await axios.get('http://localhost:1337/api/intros?populate=*');
-  if (response.data && Array.isArray(response.data.data)) {
-    introsData.value = response.data.data.map((introData) => ({
-      text: introData.attributes.text,
-    }));
-    console.log(introsData.value[0].text);
-  } else {
-    console.error('Data structure is not as expected:', response.data);
-  }
+  const textIntro = response.data.data.map((introData) => ({
+    text: introData.attributes.text,
+    image: introData.attributes.logo.data.attributes.url,
+  }));
+  // console.log('test', textIntro);
+  introsData.value = textIntro;
+  // console.log('intro', introsData.value);
 }
 
-const urlImg = ref('http://localhost:1337/uploads/small_LOGOJ_8f37b3c4f3.jpg');
+async function getCaroussel() {
+  const response = await axios.get('http://localhost:1337/api/caroussels?populate=*');
+  const datas = response.data.data.map((data) => ({
+    caroussel: data.attributes.caroussel,
+  }));
+  console.log('caroussel', datas);
+  carousselsData.value = datas;
+  console.log(carousselsData.value);
+}
 
 onMounted(() => {
   getIntroData();
+  getCaroussel();
 });
+
 </script>
 
-<style>
+<style scoped>
 .parallax-container {
   margin-top: 70px;
 }
 .intro-container {
+  padding-left: 4rem;
+  margin-top: 50px;
   display: flex;
   align-items: center;
   gap: 2rem;
 }
+p {
+  font-size: 24px;
+}
 .image-container {
-  width: 50%;
+  width: 35rem;
+  padding: 10%;
 }
 .text-container {
-  width: 50%;
+  padding: 0 15% 0 2%;
+}
+.caroussel-container {
+  height: 300px;
 }
 </style>
